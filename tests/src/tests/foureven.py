@@ -1,5 +1,4 @@
 import sys
-import os
 import time
 import subprocess
 import testclass
@@ -8,17 +7,23 @@ import testclass
 class foureven(testclass.testclass):
     def __init__(self) -> None:
         super().__init__(
-            "4\n6\n8\nWe have 4 even numbers\n", "/jail/student/foureven.py"
+            correct_output="2\n4\n6\n8\nWe have 4 even numbers\n",
+            exercise_location="/jail/student/foureven.py",
+        )
+        # Add single string as disallowed
+        super().add_illegal_string("We have 4 even numbers")
+        super().add_illegal_strings(
+            [
+                "for.*in",  # Disallow for-loops
+                "print\\(f?[\"']?.*[\"']?\\)",  # Disallow prints
+            ]
         )
 
     # Implemnt test_run
     def test_run(self) -> int:
         exercise_location = super().get_exercise_location()
 
-        if not os.path.exists(exercise_location) and not os.path.isfile(
-            exercise_location
-        ):
-            print("Can't find your exercise file: 'foureven.py'", file=sys.stderr)
+        if not testclass.testclass.exercise_file_exists(exercise_location):
             return 1
 
         # Run the student's solution with python
@@ -57,13 +62,11 @@ class foureven(testclass.testclass):
         result_out = "".join(lines)
 
         # Check if the student's program output matches the solutions
-        if result_out == super().get_correct_output():
-            # TODO: Check if student hardcoded solution
+        correct_output = super().get_correct_output()
+        if (
+            testclass.testclass.check_output(correct_output, result_out)
+            and not super().check_illegal_patterns()
+        ):
             return 0
         else:
-            # If not, print student's output and solution
-            print(
-                f"Got wrong output, your program printed:\n{result_out}\n\nExpected:\n{super().get_correct_output()}\n",
-                file=sys.stderr,
-            )
             return 1
