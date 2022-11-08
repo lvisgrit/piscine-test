@@ -1,1 +1,1 @@
-# piscine-test
+# Example tests for `grit:lab`
